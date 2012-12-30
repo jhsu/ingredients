@@ -20,4 +20,38 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  module Dsl
+    def attribute(name, options={})
+      add_definition IngredientDefinition::Attribute, name, options
+    end
+
+    def data_bag_attribute(name, options={})
+      add_definition IngredientDefinition::DataBagAttribute, name, options
+    end
+
+    def data_bag_item(data_bag_id, data_bag_item_id)
+      @data_bag_id = data_bag_id
+      @data_bag_item_id = data_bag_item_id
+    end
+
+    def named_collection(name, options={}, &block)
+      add_definition IngredientDefinition::NamedCollection, name, options,
+                     &block
+    end
+
+    def namespace(name, options={}, &block)
+      add_definition IngredientDefinition::Namespace, name, options, &block
+    end
+
+    def ordered_collection(name, options={}, &block)
+      add_definition IngredientDefinition::OrderedCollection, name, options,
+                     &block
+    end
+
+    def search_collection(name, options={}, &block)
+      add_definition IngredientDefinition::SearchCollection, name, options,
+                     &block
+    end
+  end
+end

@@ -20,4 +20,11 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  module Accessor
+    def ingredients
+      return @ingredients if instance_variable_defined? :@ingredients
+      @ingredients = {}
+    end
+  end
+end

@@ -20,4 +20,26 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  class Configuration
+    class SearchItem < Configuration
+      attr_reader :config, :name
+
+      def self.attribute(name, options={})
+        add_definition IngredientDefinition::SearchItemAttribute, name, options
+      end
+
+      alias_method :default, :config
+
+      def initialize(parent, name, config)
+        super parent
+        @config = config
+        @name = name
+      end
+
+      def path_components
+        [configuration_name, name]
+      end
+    end
+  end
+end

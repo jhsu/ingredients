@@ -1,3 +1,5 @@
+require File.join(File.dirname(__FILE__), 'ingredient_definition_attribute')
+
 #
 # Copyright 2012, David P. Kleinschmidt
 #
@@ -20,4 +22,14 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  class IngredientDefinition
+    class OrderedItemAttribute < Attribute
+      def set_defaults(configuration)
+        unless configuration.default.has_key? name
+          configuration.default[name] = default_for configuration
+        end
+      end
+    end
+  end
+end

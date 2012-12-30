@@ -20,4 +20,39 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  class Configuration
+    class NamedItem < Configuration
+      attr_reader :name
+
+      def config
+        if parent.config.nil? ||
+            !parent.config.has_key?(configuration_name) ||
+            !parent.config[configuration_name].has_key?(name)
+          Mash.new
+        else
+          parent.config[configuration_name][name]
+        end
+      end
+
+      def data_bag_item
+        return @data_bag_item if instance_variable_defined? :@data_bag_item
+        @data_bag_item = parent.data_bag_item.fetch(configuration_name, Mash.new).
+            fetch(name, Mash.new)
+      end
+
+      def default
+        parent.default[configuration_name][name]
+      end
+
+      def initialize(parent, name)
+        super parent
+        @name = name
+      end
+
+      def path_components
+        [configuration_name, name]
+      end
+    end
+  end
+end

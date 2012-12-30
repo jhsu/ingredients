@@ -1,3 +1,6 @@
+require File.join(File.dirname(__FILE__),
+                  'ingredient_definition_attribute_base')
+
 #
 # Copyright 2012, David P. Kleinschmidt
 #
@@ -20,4 +23,15 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  class IngredientDefinition
+    class SearchItemAttribute < AttributeBase
+      def set_defaults(configuration)
+      end
+
+      def value(configuration)
+        configuration.config.fetch name, default_for(configuration)
+      end
+    end
+  end
+end

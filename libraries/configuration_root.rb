@@ -20,4 +20,31 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  class Configuration
+    class Root < Configuration
+      def config
+        node[configuration_name]
+      end
+
+      def data_bag_item
+        return @data_bag_item if instance_variable_defined? :@data_bag_item
+        raw_data = Mash.new begin
+          Chef::DataBagItem.load(data_bag_id, data_bag_item_id).raw_data
+        rescue Net::HTTPServerException => err
+          {}
+        end
+        @data_bag_item = raw_data[configuration_name]
+      end
+
+      def default
+        node.default[configuration_name]
+      end
+
+      def path
+        return @path if instance_variable_defined? :@path
+        @path = path_components
+      end
+    end
+  end
+end

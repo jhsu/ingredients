@@ -20,4 +20,21 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  class Configuration
+    class Namespace < Configuration
+      def config
+        parent.config[configuration_name]
+      end
+
+      def data_bag_item
+        return @data_bag_item if instance_variable_defined? :@data_bag_item
+        @data_bag_item = parent.data_bag_item.fetch configuration_name, Mash.new
+      end
+
+      def default
+        parent.default[configuration_name]
+      end
+    end
+  end
+end

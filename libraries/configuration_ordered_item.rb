@@ -20,4 +20,30 @@
 # SOFTWARE.
 #
 
-Ingredients.set_defaults self
+module Ingredients
+  class Configuration
+    class OrderedItem < Configuration
+      attr_reader :index
+
+      def self.attribute(name, options={})
+        add_definition IngredientDefinition::OrderedItemAttribute, name, options
+      end
+
+      def config
+        return @config if instance_variable_defined? :@config
+        @config = parent.config[configuration_name][index]
+      end
+
+      alias_method :default, :config
+
+      def initialize(parent, index)
+        super parent
+        @index = index
+      end
+
+      def path_components
+        [configuration_name, index]
+      end
+    end
+  end
+end
