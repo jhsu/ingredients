@@ -1,6 +1,6 @@
 require 'forwardable'
 require File.join(File.dirname(__FILE__), 'dsl')
-require File.join(File.dirname(__FILE__), 'accessor')
+require File.join(File.dirname(__FILE__), 'accessors')
 
 #
 # Copyright 2012, David P. Kleinschmidt
@@ -27,6 +27,7 @@ require File.join(File.dirname(__FILE__), 'accessor')
 module Ingredients
   class Configuration
     extend Dsl, Forwardable
+    include Accessors
 
     class << self
       attr_accessor :configuration_name
@@ -36,13 +37,12 @@ module Ingredients
     attr_reader :parent
 
     def_delegators 'self.class', :configuration_name, :data_bag_id,
-                   :data_bag_item_id, :ingredient_definitions
+                   :data_bag_item_id, :definitions
     def_delegators :parent, :node
 
     def self.add_definition(class_, name, options={}, &block)
-      if ingredient_definitions.has_key? name
-        ingredient = ingredient_definitions[name]
-        puts "OPENING #{ingredient.class} #{name.inspect} IN #{configuration_name.inspect}"
+      if definitions.has_key? name
+        ingredient = definitions[name]
         unless ingredient.instance_of? class_
           raise TypeError, "Ingredient #{name.inspect} cannot be redefined from #{ingredient.class} to #{class_}."
         end
@@ -55,8 +55,7 @@ module Ingredients
         end
       else
         ingredient = class_.new self, name, options
-        puts "CREATING NEW #{class_} #{name.inspect} IN #{configuration_name.inspect}"
-        ingredient_definitions[ingredient.name] = ingredient
+        definitions[ingredient.name] = ingredient
         define_method name do
           ingredient.get self
         end
@@ -70,18 +69,16 @@ module Ingredients
       end
     end
 
-    def self.ingredient_definitions
-      if instance_variable_defined? :@ingredient_definitions
-        return @ingredient_definitions
+    def self.definitions
+      if instance_variable_defined? :@definitions
+        return @definitions
       end
-      @ingredient_definitions = {}
+      @definitions = {}
     end
 
     def self.to_s
       "<#{configuration_name}".tap do |string|
-        ingredient_definitions.each_key do |name|
-          string << " #{name}"
-        end
+        definitions.each_key {|name| string << " #{name}"}
         string << '>'
       end
     end
@@ -100,15 +97,13 @@ module Ingredients
     end
 
     def set_defaults
-      ingredient_definitions.each do |name, ingredient_definition|
-        ingredient_definition.set_defaults self
-      end
+      definitions.each {|name, definition| definition.set_defaults self}
     end
 
     def to_s
       "<#{configuration_name}".tap do |string|
-        ingredient_definitions.each do |name, ingredient_definition|
-          string << " #{name}=#{ingredient_definition.get(self).inspect}"
+        definitions.each do |name, definition|
+          string << " #{name}=#{definition.get(self).inspect}"
         end
         string << '>'
       end

@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'ingredient_definition_attribute')
+require File.join(File.dirname(__FILE__), 'definition_attribute')
 
 #
 # Copyright 2012, David P. Kleinschmidt
@@ -23,7 +23,7 @@ require File.join(File.dirname(__FILE__), 'ingredient_definition_attribute')
 #
 
 module Ingredients
-  class IngredientDefinition
+  class Definition
     class OrderedItemAttribute < Attribute
       def set_defaults(configuration)
         unless configuration.default.has_key? name

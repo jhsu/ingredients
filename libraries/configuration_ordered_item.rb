@@ -26,7 +26,7 @@ module Ingredients
       attr_reader :index
 
       def self.attribute(name, options={})
-        add_definition IngredientDefinition::OrderedItemAttribute, name, options
+        add_definition Definition::OrderedItemAttribute, name, options
       end
 
       def config

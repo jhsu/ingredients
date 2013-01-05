@@ -1,4 +1,4 @@
-maintainer       'Patchwerks'
+maintainer       'David P. Kleinschmidt'
 maintainer_email 'david@kleinschmidt.name'
 license          'MIT'
 description      'Clean up your cookbooks with ingredients'

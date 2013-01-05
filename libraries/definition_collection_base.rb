@@ -1,6 +1,4 @@
-require File.join(File.dirname(__FILE__), 'configuration_ordered_item')
-require File.join(File.dirname(__FILE__),
-                  'ingredient_definition_collection_base')
+require 'forwardable'
 
 #
 # Copyright 2012, David P. Kleinschmidt
@@ -25,25 +23,21 @@ require File.join(File.dirname(__FILE__),
 #
 
 module Ingredients
-  class IngredientDefinition
-    class OrderedCollection < CollectionBase
-      self.collection_class = Configuration::OrderedItem
+  class Definition
+    class CollectionBase < Definition
+      extend Forwardable
 
-      def set_defaults(configuration)
-        get(configuration).each &:set_defaults
+      class << self
+        attr_accessor :collection_class
       end
 
-      def value(configuration)
-        [].tap do |value|
-          config = if configuration.config.has_key? name
-            configuration.config[name]
-          else
-            []
-          end
-          config.count.times do |index|
-            value << item_class.new(configuration, index)
-          end
-        end
+      attr_reader :item_class
+      def_delegators :item_class, :add_ingredients
+      def_delegators 'self.class', :collection_class
+
+      def initialize(configuration_class, name, options={})
+        super configuration_class, name, options
+        @item_class = collection_class.create configuration_class, name
       end
     end
   end

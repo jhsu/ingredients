@@ -24,7 +24,9 @@ module Ingredients
   class Configuration
     class Namespace < Configuration
       def config
-        parent.config[configuration_name]
+        unless parent.config.nil?
+          parent.config[configuration_name]
+        end
       end
 
       def data_bag_item

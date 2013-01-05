@@ -1,6 +1,3 @@
-require File.join(File.dirname(__FILE__),
-                  'ingredient_definition_attribute_base')
-
 #
 # Copyright 2012, David P. Kleinschmidt
 #
@@ -24,15 +21,23 @@ require File.join(File.dirname(__FILE__),
 #
 
 module Ingredients
-  class IngredientDefinition
-    class Attribute < AttributeBase
-      def set_defaults(configuration)
-        configuration.default[name] = default_for configuration
-      end
+  class Definition
+    attr_reader :configuration_class, :name, :options
 
-      def value(configuration)
-        configuration.config[name]
+    def add_ingredients(&block)
+    end
+
+    def get(configuration)
+      if configuration.ingredients.has_key? name
+        return configuration.ingredients[name]
       end
+      configuration.ingredients[name] = value configuration
+    end
+
+    def initialize(configuration_class, name, options)
+      @configuration_class = configuration_class
+      @name = name.to_sym
+      @options = Mash.new options
     end
   end
 end

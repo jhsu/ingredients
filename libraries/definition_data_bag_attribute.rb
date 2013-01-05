@@ -1,4 +1,4 @@
-require 'forwardable'
+require File.join(File.dirname(__FILE__), 'definition_attribute_base')
 
 #
 # Copyright 2012, David P. Kleinschmidt
@@ -23,21 +23,13 @@ require 'forwardable'
 #
 
 module Ingredients
-  class IngredientDefinition
-    class CollectionBase < IngredientDefinition
-      extend Forwardable
-
-      class << self
-        attr_accessor :collection_class
+  class Definition
+    class DataBagAttribute < AttributeBase
+      def set_defaults(configuration)
       end
 
-      attr_reader :item_class
-      def_delegators :item_class, :add_ingredients
-      def_delegators 'self.class', :collection_class
-
-      def initialize(configuration_class, name, options={})
-        super configuration_class, name, options
-        @item_class = collection_class.create configuration_class, name
+      def value(configuration)
+        configuration.data_bag_item.fetch name, default_for(configuration)
       end
     end
   end

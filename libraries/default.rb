@@ -26,18 +26,6 @@ module Ingredients
     @configurations = Mash.new
   end
 
-  def self.include_classes
-    return @include_classes if instance_variable_defined? :@include_classes
-    @include_classes = [
-      Chef::Provider,
-      Chef::Recipe,
-      Chef::Resource,
-      Chef::RunContext,
-      Erubis::Context,
-      Ingredients::Configuration
-    ]
-  end
-
   def self.for_cookbook(name, &block)
     if configurations.has_key? name
       ingredient_class = configurations[name]
@@ -45,15 +33,9 @@ module Ingredients
       ingredient_class = Configuration::Root.create nil, name
       configurations[name] = ingredient_class
 
-      top_level = Module.new do
-        define_method name do
-          return ingredients[name] if ingredients.has_key? name
-          ingredients[name] = ingredient_class.new self
-        end
-      end
-
-      include_classes.each do |class_|
-        class_.__send__ :include, Accessor, top_level
+      Accessors.__send__ :define_method, name do
+        return ingredients[name] if ingredients.has_key? name
+        ingredients[name] = ingredient_class.new self
       end
     end
 
@@ -61,11 +43,6 @@ module Ingredients
   end
 
   def self.set_defaults(context)
-    configurations.each_key do |name|
-      puts "SETTING DEFAULTS FOR #{name.inspect} ON #{context.node.object_id}"
-      puts "\tATTRIBUTES IN: #{context.node[name].inspect}"
-      context.send(name).set_defaults
-      puts "\tATTRIBUTES OUT: #{context.node[name].inspect}"
-    end
+    configurations.each_key {|name| context.send(name).set_defaults}
   end
 end

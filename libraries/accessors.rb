@@ -1,6 +1,3 @@
-require File.join(File.dirname(__FILE__),
-                  'ingredient_definition_attribute_base')
-
 #
 # Copyright 2012, David P. Kleinschmidt
 #
@@ -24,14 +21,18 @@ require File.join(File.dirname(__FILE__),
 #
 
 module Ingredients
-  class IngredientDefinition
-    class DataBagAttribute < AttributeBase
-      def set_defaults(configuration)
-      end
-
-      def value(configuration)
-        configuration.data_bag_item.fetch name, default_for(configuration)
-      end
+  module Accessors
+    def ingredients
+      return @ingredients if instance_variable_defined? :@ingredients
+      @ingredients = {}
     end
   end
+
+  [
+    Chef::Provider,
+    Chef::Recipe,
+    Chef::Resource,
+    Chef::RunContext,
+    Erubis::Context
+  ].each {|class_| class_.__send__ :include, Accessors}
 end

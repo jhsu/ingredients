@@ -26,7 +26,7 @@ module Ingredients
       attr_reader :config, :name
 
       def self.attribute(name, options={})
-        add_definition IngredientDefinition::SearchItemAttribute, name, options
+        add_definition Definition::SearchItemAttribute, name, options
       end
 
       alias_method :default, :config
