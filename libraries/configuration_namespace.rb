@@ -1,39 +1,57 @@
-#
-# Copyright 2012, David P. Kleinschmidt
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-
 module Ingredients
   class Configuration
+
+    #
+    # Represents an item in a namespace. The following excerpt from a role file
+    # would have one corresponding `Namespace` object with a name of
+    # `logrotate`. It would be accessed through `my_service.logrotate`.
+    #
+    # ```ruby
+    # override_attributes({
+    #   my_service: {
+    #     logrotate: {
+    #       frequency: :weekly,
+    #       rotate:    4
+    #     }
+    #   }
+    # })
+    # ```
+    #
     class Namespace < Configuration
+
+      #
+      # Retrieves this `Namespace`'s node attributes, or `nil` if there are no
+      # corresponding node attributes. This should be called only by the various
+      # {Definition} `get` methods, and only to retrieve the value of a
+      # configuration option (ie, not to set it).
+      #
+      # @return [Chef::Node::Attribute, nil] This item's node attributes.
+      #
       def config
         unless parent.config.nil?
           parent.config[configuration_name]
         end
       end
 
+      #
+      # Retrieves the portion of this configuration's data bag item that
+      # corresponds to this `Namespace`, or an empty Mash if it does not exist.
+      # This should only be called by the various {Definition} `get` methods.
+      #
+      # @return [Chef::Node::Attribute, Mash] This item's data bag item.
+      #
       def data_bag_item
         return @data_bag_item if instance_variable_defined? :@data_bag_item
         @data_bag_item = parent.data_bag_item.fetch configuration_name, Mash.new
       end
 
+      #
+      # Retrieves this `Namespace`'s default node attributes. This should be
+      # called only by the various {Definition} `set_defaults` methods, and only
+      # to set the default value of a configuration option (ie, not to get it).
+      #
+      # @return [Chef::Node::Attribute] This item's node attributes.
+      #
       def default
         parent.default[configuration_name]
       end

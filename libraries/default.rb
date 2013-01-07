@@ -1,31 +1,32 @@
 #
-# Copyright 2012, David P. Kleinschmidt
+# Provides a DSL for defining the structure of Chef configuration parameters.
+# The main entry point into the DSL is {for_cookbook}, which should be placed in
+# your `attributes/default.rb` file.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+# @author David P. Kleinschmidt
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-
 module Ingredients
+
+  #
+  # Gets all top-level configuration classes.
+  #
+  # @return [Mash{String, Symbol => Class}] All top-level configuration classes,
+  #         indexed by name.
+  #
   def self.configurations
     return @configurations if instance_variable_defined? :@configurations
     @configurations = Mash.new
   end
 
+  #
+  # Creates or opens the top-level configuration class for a cookbook and
+  # defines its attributes. The configuration class is an anonymous subclass of
+  # {Configuration::Root}). The block is `class_eval`'d inside the class, where
+  # all the methods of {Dsl} are available.
+  #
+  # @return [Configuration::Root] The top-level configuration class for the
+  #         cookbook.
+  #
   def self.for_cookbook(name, &block)
     if configurations.has_key? name
       ingredient_class = configurations[name]
@@ -39,9 +40,16 @@ module Ingredients
       end
     end
 
-    ingredient_class.add_ingredients &block
+    ingredient_class.add_ingredients &block unless block.nil?
+    ingredient_class
   end
 
+  #
+  # Sets defaults for all defined cookbooks. This should only be called once per
+  # Chef run, from inside the `ingredients` recipe.
+  #
+  # @param context [#node] The run context in which to set defaults.
+  #
   def self.set_defaults(context)
     configurations.each_key {|name| context.send(name).set_defaults}
   end

@@ -1,30 +1,37 @@
-#
-# Copyright 2012, David P. Kleinschmidt
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-
 module Ingredients
+
+  #
+  # Provides accessors to the configuration instances defined by {for_cookbook}.
+  # If you call, for instance,
+  #
+  # ```ruby
+  # Ingredients.for_cookbook :my_service do
+  #   # ...
+  # end
+  # ```
+  #
+  # This will add an accessor named `my_service` to {Accessors} and, by
+  # extension, every class that includes it. This module is already included
+  # into several Chef classes: `Chef::Provider`, `Chef::Recipe`,
+  # `Chef::Resource`, `Chef::RunContext`, and `Erubis::Context`. It can also be
+  # included explicitly in any class that defines a `node` method (though it
+  # should be considered a bug if it is not automatically included in a
+  # relatively-standard Chef class).
+  #
   module Accessors
+
+    #
+    # Get the Mash that is used to hold memoized instances of configuration
+    # options. As the contents of this Mash may be incomplete, you should
+    # instead be accessing configurations through the cookbook-specific accessor
+    # method.
+    #
+    # @return [Mash{String, Symbol => Configuration::Root}] All the
+    #         configuration objects accessed so far in this context.
+    #
     def ingredients
       return @ingredients if instance_variable_defined? :@ingredients
-      @ingredients = {}
+      @ingredients = Mash.new
     end
   end
 
