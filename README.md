@@ -22,6 +22,10 @@ read, maintain, and use. If you agree, `ingredients` might be for you:
 If you want to see how this all fits together, [skip right to the end]
 (#full-example).
 
+## Requirements
+
+* Ruby 1.9+ (use the latest version of chef installed via
+  [Omnibus](http://www.opscode.com/chef/install/))
 
 ## Adding ingredients
 
