@@ -31,7 +31,7 @@ module Ingredients
     if configurations.has_key? name
       ingredient_class = configurations[name]
     else
-      ingredient_class = Configuration::Root.create nil, name
+      ingredient_class = Configuration::Root.create name
       configurations[name] = ingredient_class
 
       Accessors.__send__ :define_method, name do
@@ -40,7 +40,7 @@ module Ingredients
       end
     end
 
-    ingredient_class.add_ingredients &block unless block.nil?
+    ingredient_class.add_ingredients(&block) unless block.nil?
     ingredient_class
   end
 

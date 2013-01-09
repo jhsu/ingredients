@@ -15,7 +15,7 @@ module Ingredients
 
       def initialize(configuration_class, name, options={})
         super configuration_class, name, options
-        @item_class = collection_class.create configuration_class, name
+        @item_class = collection_class.create name
       end
     end
   end
