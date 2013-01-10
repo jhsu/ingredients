@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), 'definition_collection_base')
+require File.join(File.dirname(__FILE__), 'configuration_search_item')
 
 module Ingredients
   class Definition
