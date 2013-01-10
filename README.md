@@ -92,22 +92,25 @@ defined at the beginning of the class with `data_bag_item`, and applies to all
 
 ```ruby
 Ingredients.for_cookbook :my_service do
-  data_bag_item 'services', 'my_service'
+  data_bag_item 'my_service', 'secure_config'
 
   data_bag_attribute :ssl_certificate
   data_bag_attribute :ssl_key
 end
 ```
 
-The preceding definition will look for an item named `my_service` in a data bag
-called `services` which looks like this:
+The preceding definition will look for an item named `secure_config` in a data
+bag called `my_service` which looks like this. Note the `my_service` key at the
+top level: redundant though this may seem, this enforces consistency between
+node attributes and data bag items, and also prevents naming conflicts when
+multiple cookbooks use the same data bag item.
 
 ```json
 {
-  "id": "my_service",
+  "id": "secure_config",
   "my_service": {
-    "ssl_certificate": "...",
-    "ssl_key":         "..."
+    "ssl_certificate": "-----BEGIN CERTIFICATE-----\nMII...",
+    "ssl_key":         "-----BEGIN RSA PRIVATE KEY-----\nMII..."
   }
 }
 ```
@@ -251,7 +254,10 @@ This creates a collection called `users` in each cluster which returns all items
 in the `people` data bag with a corresponding key. This person has write access
 to the `primary` cluster, read access to the `secondary` cluster, and no access
 to the `guest` cluster. As always, attributes that are not explicitly provided
-fall back to the defaults specified in the definitions.
+fall back to the defaults specified in the definitions. Note that, as with `data
+bag attribute`s, the top-level key corresponds to the cookbook so that multiple
+cookbooks can share the same data bag items without risking naming conflicts. In
+this case, the `admin` user also has some attributes for `postgresql`.
 
 ```json
 {
@@ -270,6 +276,9 @@ fall back to the defaults specified in the definitions.
         }
       }
     }
+  },
+  "postgresql": {
+    "password": "freezing-dangerzone"
   }
 }
 ```
@@ -323,7 +332,7 @@ This is what all the examples look like when combined.
 
 ```ruby
 Ingredients.for_cookbook :my_service do
-  data_bag_item 'services', 'my_service'
+  data_bag_item 'my_service', 'secure_config'
 
   attribute :config_directory, default: '/etc/my_service'
   attribute :data_directory,   default: '/var/lib/my_service'
@@ -334,6 +343,13 @@ Ingredients.for_cookbook :my_service do
   named_collection :clusters, default: 'main' do
     attribute :guest_access, default: false
     attribute :owner,        default: 'admin'
+
+    search_collection :users, as: :user_options, sources: [:people] do
+      attribute :login,    default: true
+      attribute :password
+      attribute :read,     default: true
+      attribute :write,    default: false
+    end
   end
 
   ordered_collection :listen_addresses do
@@ -350,13 +366,6 @@ Ingredients.for_cookbook :my_service do
     attribute :compress,  default: true
     attribute :frequency, default: :daily
     attribute :rotate,    default: 5
-  end
-
-  search_collection :users, as: :user_options, sources: [:people] do
-    attribute :login,    default: true
-    attribute :password
-    attribute :read,     default: true
-    attribute :write,    default: false
   end
 end
 ```
@@ -404,18 +413,21 @@ override_attributes({
         }
       }
     }
+  },
+  "postgresql": {
+    "password": "freezing-dangerzone"
   }
 }
 ```
 
-`data_bags/services/my_service.json`:
+`data_bags/my_service/secure_config.json`:
 
 ```json
 {
-  "id": "my_service",
+  "id": "secure_config",
   "my_service": {
-    "ssl_certificate": "...",
-    "ssl_key":         "..."
+    "ssl_certificate": "-----BEGIN CERTIFICATE-----\nMII...",
+    "ssl_key":         "-----BEGIN RSA PRIVATE KEY-----\nMII..."
   }
 }
 ```
@@ -431,7 +443,7 @@ some example expressions and their approximate raw Chef equivalents.
 ```ruby
 my_service.config_directory                # node[:my_service][:config_directory]
 my_service.logrotate.frequency             # node[:my_service][:logrotate][:frequency]
-my_service.ssl_certificate                 # data_bag_item('services', 'my_service').raw_data['my_service']['ssl_certificate']
+my_service.ssl_certificate                 # data_bag_item('my_service', 'secure_config').raw_data['my_service']['ssl_certificate']
 
 my_service.bogus_attribute                 # node[:my_service][:bogus_attribute]
 # => NoMethodError                         #   => nil
