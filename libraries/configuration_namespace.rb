@@ -42,7 +42,12 @@ module Ingredients
       #
       def data_bag_item
         return @data_bag_item if instance_variable_defined? :@data_bag_item
-        @data_bag_item = parent.data_bag_item.fetch configuration_name, Mash.new
+        parent_item = if parent.data_bag_item.nil?
+          Mash.new
+        else
+          parent.data_bag_item
+        end
+        @data_bag_item = parent_item.fetch configuration_name, Mash.new
       end
 
       #

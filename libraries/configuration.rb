@@ -1,6 +1,6 @@
 require 'forwardable'
-require File.join(File.dirname(__FILE__), 'dsl')
 require File.join(File.dirname(__FILE__), 'accessors')
+require File.join(File.dirname(__FILE__), 'dsl')
 
 module Ingredients
 

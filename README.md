@@ -400,7 +400,7 @@ override_attributes({
       },
       "secondary": {
         "user_options": {
-          "password: "miniature-ninja"
+          "password": "miniature-ninja"
         }
       }
     }

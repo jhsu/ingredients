@@ -1,3 +1,5 @@
+require File.join(File.dirname(__FILE__), 'configuration')
+
 module Ingredients
   class Configuration
 
